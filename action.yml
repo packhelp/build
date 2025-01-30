@@ -35,7 +35,7 @@ runs:
       shell: bash
       run: |
         docker build \
-          --tag ${{ inputs.registry }}/${{ inputs.app }}:${{ inputs.tag }} \
+          --tag ${{ inputs.registry_address }}/${{ inputs.app }}:${{ inputs.tag }} \
           --file ${{ inputs.dockerfile }} \
           ${{ inputs.context }}
 
@@ -49,4 +49,4 @@ runs:
 
     - name: Push image to registry
       shell: bash
-      run: docker push "${{ inputs.registry }}/${{ inputs.app }}:${{ inputs.tag }}"
+      run: docker push "${{ inputs.registry_address }}/${{ inputs.app }}:${{ inputs.tag }}"
