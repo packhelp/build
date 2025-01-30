@@ -28,7 +28,6 @@ inputs:
 
 runs:
   using: "composite"
-  runs-on: [self-hosted, deploy-blue]
   steps:
     - uses: actions/checkout@v4
 

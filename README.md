@@ -24,6 +24,7 @@ jobs:
   build:
     steps:
       - uses: packhelp/build@v1
+        runs-on: [self-hosted, deploy-blue]
         with:
           app: myapp
           registry_address: ${{ secrets.DOCKER_REGISTRY_ADDRESS_QUAY }}
