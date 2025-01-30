@@ -32,6 +32,7 @@ runs:
     - uses: actions/checkout@v4
 
     - name: Build Docker image
+      shell: bash
       run: |
         docker build \
           --tag ${{ inputs.registry }}/${{ inputs.app }}:${{ inputs.tag }} \
@@ -47,4 +48,5 @@ runs:
         logout: false
 
     - name: Push image to registry
+      shell: bash
       run: docker push "${{ inputs.registry }}/${{ inputs.app }}:${{ inputs.tag }}"
