@@ -27,7 +27,7 @@ jobs:
         runs-on: [self-hosted, deploy-blue]
         with:
           app: myapp
-          registry_address: ${{ secrets.DOCKER_REGISTRY_ADDRESS_QUAY }}
+          registry_address: ${{ vars.DOCKER_REGISTRY_ADDRESS }}
           registry_username: ${{ secrets.DOCKER_REGISTRY_USERNAME }}
           registry_password: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
 ```
