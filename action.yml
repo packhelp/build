@@ -42,9 +42,9 @@ runs:
     - name: Login to registry
       uses: docker/login-action@v3
       with:
-        registry: ${{ secrets.REGISTRY_ADDRESS }}
-        username: ${{ secrets.REGISTRY_USERNAME }}
-        password: ${{ secrets.REGISTRY_PASSWORD }}
+        registry: ${{ inputs.registry_address }}
+        username: ${{ inputs.registry_username }}
+        password: ${{ inputs.registry_password }}
         logout: false
 
     - name: Push image to registry
