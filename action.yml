@@ -1,0 +1,51 @@
+name: "Docker Build & Push"
+description: "Builds a Docker image and pushes it to a container registry"
+inputs:
+  app:
+    description: "Application to build"
+    required: true
+  dockerfile:
+    description: "Dockerfile to build"
+    required: false
+    default: "Dockerfile"
+  context:
+    description: "Docker build context"
+    required: false
+    default: "."
+  tag:
+    description: "Docker image tag"
+    required: false
+    default: "${{ github.sha }}"
+  registry_address:
+    description: "Container registry address"
+    required: true
+  registry_username:
+    description: "Container registry username"
+    required: true
+  registry_password:
+    description: "Container registry password"
+    required: true
+
+runs:
+  using: "composite"
+  runs-on: [self-hosted, deploy-blue]
+  steps:
+    - uses: actions/checkout@v4
+
+    - name: Build Docker image
+      run: |
+        docker build \
+          --tag ${{ inputs.registry }}/${{ inputs.app }}:${{ inputs.tag }} \
+          --file ${{ inputs.dockerfile }} \
+          ${{ inputs.context }}
+
+    - name: Login to registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ secrets.REGISTRY_ADDRESS }}
+        username: ${{ secrets.REGISTRY_USERNAME }}
+        password: ${{ secrets.REGISTRY_PASSWORD }}
+        logout: false
+
+    - name: Push image to registry
+      run: docker push "${{ inputs.registry }}/${{ inputs.app }}:${{ inputs.tag }}"
