@@ -16,6 +16,10 @@ inputs:
     description: "Docker image tag"
     required: false
     default: "${{ github.sha }}"
+  args:
+    description: "Additional 'docker build' arguments"
+    required: false
+    default: ""
   registry_address:
     description: "Container registry address"
     required: true
@@ -35,6 +39,7 @@ runs:
       shell: bash
       run: |
         docker build \
+          ${{ inputs.args }} \
           --tag ${{ inputs.registry_address }}/${{ inputs.app }}:${{ inputs.tag }} \
           --file ${{ inputs.dockerfile }} \
           ${{ inputs.context }}
