@@ -38,7 +38,7 @@ runs:
     - name: Build Docker image
       shell: bash
       run: |
-        docker build \
+        docker buildx build \
           ${{ inputs.args }} \
           --tag ${{ inputs.registry_address }}/${{ inputs.app }}:${{ inputs.tag }} \
           --file ${{ inputs.dockerfile }} \
