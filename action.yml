@@ -8,6 +8,9 @@ inputs:
     description: "Dockerfile to build"
     required: false
     default: "Dockerfile"
+  dockerignore_override:
+    description: "Override default .dockerignore file from context"
+    required: false
   context:
     description: "Docker build context"
     required: false
@@ -38,11 +41,20 @@ runs:
     - name: Build Docker image
       shell: bash
       run: |
+        if [ -n "${{ inputs.dockerignore_override }}" ]; then
+          cp "${{ inputs.context }}/.dockerignore" "${{ inputs.context }}/.dockerignore.bak"
+          cp "${{ inputs.dockerignore_override }}" "${{ inputs.context }}/.dockerignore"
+        fi
+
         docker buildx build \
           ${{ inputs.args }} \
           --tag ${{ inputs.registry_address }}/${{ inputs.app }}:${{ inputs.tag }} \
           --file ${{ inputs.dockerfile }} \
           ${{ inputs.context }}
+
+        if [ -n "${{ inputs.dockerignore_override }}" ]; then
+          mv "${{ inputs.context }}/.dockerignore.bak" "${{ inputs.context }}/.dockerignore"
+        fi
 
     - name: Login to registry
       uses: docker/login-action@v3
