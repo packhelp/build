@@ -47,10 +47,10 @@ runs:
         fi
 
         docker buildx build \
-          ${{ inputs.args }} \
           --tag ${{ inputs.registry_address }}/${{ inputs.app }}:${{ inputs.tag }} \
           --file ${{ inputs.dockerfile }} \
-          ${{ inputs.context }}
+          ${{ inputs.context }} \
+          ${{ inputs.args }}
 
         if [ -n "${{ inputs.dockerignore_override }}" ]; then
           mv "${{ inputs.context }}/.dockerignore.bak" "${{ inputs.context }}/.dockerignore"
