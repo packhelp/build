@@ -19,6 +19,10 @@ inputs:
     description: "Docker image tag"
     required: false
     default: "${{ github.sha }}"
+  directory:
+    description: "Directory to change into before building"
+    required: false
+    default: "."
   args:
     description: "Additional 'docker build' arguments"
     required: false
@@ -41,6 +45,8 @@ runs:
     - name: Build Docker image
       shell: bash
       run: |
+        cd "${{ inputs.directory }}"
+
         if [ -n "${{ inputs.dockerignore_override }}" ]; then
           cp "${{ inputs.context }}/.dockerignore" "${{ inputs.context }}/.dockerignore.bak"
           cp "${{ inputs.dockerignore_override }}" "${{ inputs.context }}/.dockerignore"
