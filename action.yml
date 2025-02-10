@@ -42,25 +42,48 @@ runs:
   steps:
     - uses: actions/checkout@v4
 
+    - name: Display build information
+      shell: bash
+      working-directory: ${{ inputs.directory }}
+      run: |
+        echo "::group::Docker Build Configuration"
+        echo "[INFO] Image Details"
+        echo "[INFO]  • Full image name: ${{ inputs.registry_address }}/${{ inputs.app }}:${{ inputs.tag }}"
+        echo "[INFO]  • Application:     ${{ inputs.app }}"
+        echo "[INFO]  • Registry:        ${{ inputs.registry_address }}"
+        echo "[INFO]  • Tag:             ${{ inputs.tag }}"
+        echo ""
+        echo "[INFO] Build Context"
+        echo "[INFO]  • Dockerfile:      ${{ inputs.dockerfile }}"
+        echo "[INFO]  • Context path:    ${{ inputs.context }}"
+        echo "[INFO]  • Working dir:     ${{ inputs.directory }}"
+        echo "[INFO]  • Build args:      ${{ inputs.args }}"
+        echo "[INFO]  • Dockerignore:    ${{ inputs.dockerignore_override || 'default' }}"
+        echo "::endgroup::"
+
+    - name: Configure .dockerignore override
+      if: inputs.dockerignore_override != ''
+      shell: bash
+      working-directory: ${{ inputs.directory }}
+      run: |
+        cp "${{ inputs.context }}/.dockerignore" "${{ inputs.context }}/.dockerignore.bak"
+        cp "${{ inputs.dockerignore_override }}" "${{ inputs.context }}/.dockerignore"
+
     - name: Build Docker image
       shell: bash
+      working-directory: ${{ inputs.directory }}
       run: |
-        cd "${{ inputs.directory }}"
-
-        if [ -n "${{ inputs.dockerignore_override }}" ]; then
-          cp "${{ inputs.context }}/.dockerignore" "${{ inputs.context }}/.dockerignore.bak"
-          cp "${{ inputs.dockerignore_override }}" "${{ inputs.context }}/.dockerignore"
-        fi
-
         docker buildx build \
           --tag ${{ inputs.registry_address }}/${{ inputs.app }}:${{ inputs.tag }} \
           --file ${{ inputs.dockerfile }} \
           ${{ inputs.context }} \
           ${{ inputs.args }}
 
-        if [ -n "${{ inputs.dockerignore_override }}" ]; then
-          mv "${{ inputs.context }}/.dockerignore.bak" "${{ inputs.context }}/.dockerignore"
-        fi
+    - name: Restore original .dockerignore
+      if: inputs.dockerignore_override != ''
+      shell: bash
+      working-directory: ${{ inputs.directory }}
+      run: mv "${{ inputs.context }}/.dockerignore.bak" "${{ inputs.context }}/.dockerignore"
 
     - name: Login to registry
       uses: docker/login-action@v3
