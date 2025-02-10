@@ -23,7 +23,7 @@ on:
 jobs:
   build:
     steps:
-      - uses: packhelp/build@v1
+      - uses: packhelp/build@v2
         runs-on: [self-hosted, deploy-blue]
         with:
           app: myapp
@@ -43,3 +43,8 @@ jobs:
 | `registry_address` | Container registry address | Yes | - |
 | `registry_username` | Registry username for authentication | Yes | - |
 | `registry_password` | Registry password for authentication | Yes | - |
+| `build_args` | Build arguments for Docker build command | No | - |
+| `cache_from` | Images to use as cache sources | No | - |
+| `target` | Target build stage to build | No | - |
+| `platforms` | Platforms to build for (e.g., linux/amd64,linux/arm64) | No | - |
+| `push` | Whether to push the image after building | No | `true` |
