@@ -46,7 +46,8 @@ runs:
       shell: bash
       working-directory: ${{ inputs.directory }}
       run: |
-        echo "::group::Docker Build Configuration"
+        echo "[INFO] Build Information ℹ️"
+        echo "[INFO] "
         echo "[INFO] Image Details"
         echo "[INFO]  • Full image name: ${{ inputs.registry_address }}/${{ inputs.app }}:${{ inputs.tag }}"
         echo "[INFO]  • Application:     ${{ inputs.app }}"
@@ -59,7 +60,6 @@ runs:
         echo "[INFO]  • Working dir:     ${{ inputs.directory }}"
         echo "[INFO]  • Build args:      ${{ inputs.args }}"
         echo "[INFO]  • Dockerignore:    ${{ inputs.dockerignore_override || 'default' }}"
-        echo "::endgroup::"
 
     - name: Configure .dockerignore override
       if: inputs.dockerignore_override != ''
