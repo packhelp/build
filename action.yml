@@ -19,7 +19,7 @@ inputs:
     description: "Docker image tag"
     required: false
     default: "${{ github.sha }}"
-  additional_tag:
+  extra_tag:
     description: "Additional Docker image tag to publish alongside the primary tag, e.g. latest or a version"
     required: false
     default: ""
@@ -57,9 +57,9 @@ runs:
         echo "[INFO]  • Application:     ${{ inputs.app }}"
         echo "[INFO]  • Registry:        ${{ inputs.registry_address }}"
         echo "[INFO]  • Primary tag:     ${{ inputs.tag }}"
-        if [ -n "${{ inputs.additional_tag }}" ]; then
-          echo "[INFO]  • Additional tag:  ${{ inputs.additional_tag }}"
-          echo "[INFO]  • Extra image:      ${{ inputs.registry_address }}/${{ inputs.app }}:${{ inputs.additional_tag }}"
+        if [ -n "${{ inputs.extra_tag }}" ]; then
+          echo "[INFO]  • Additional tag:  ${{ inputs.extra_tag }}"
+          echo "[INFO]  • Extra image:      ${{ inputs.registry_address }}/${{ inputs.app }}:${{ inputs.extra_tag }}"
         fi
         echo ""
         echo "[INFO] Build Context"
@@ -88,12 +88,12 @@ runs:
           ${{ inputs.args }}
 
     - name: Tag image with additional tag
-      if: inputs.additional_tag != ''
+      if: inputs.extra_tag != ''
       shell: bash
       run: |
         docker tag \
           "${{ inputs.registry_address }}/${{ inputs.app }}:${{ inputs.tag }}" \
-          "${{ inputs.registry_address }}/${{ inputs.app }}:${{ inputs.additional_tag }}"
+          "${{ inputs.registry_address }}/${{ inputs.app }}:${{ inputs.extra_tag }}"
 
     - name: Restore original .dockerignore
       if: inputs.dockerignore_override != ''
@@ -114,6 +114,6 @@ runs:
       run: docker push "${{ inputs.registry_address }}/${{ inputs.app }}:${{ inputs.tag }}"
 
     - name: Push additional tag to registry
-      if: inputs.additional_tag != ''
+      if: inputs.extra_tag != ''
       shell: bash
-      run: docker push "${{ inputs.registry_address }}/${{ inputs.app }}:${{ inputs.additional_tag }}"
+      run: docker push "${{ inputs.registry_address }}/${{ inputs.app }}:${{ inputs.extra_tag }}"
