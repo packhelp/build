@@ -19,6 +19,10 @@ inputs:
     description: "Docker image tag"
     required: false
     default: "${{ github.sha }}"
+  extra_tag:
+    description: "Additional Docker image tag to publish alongside the primary tag, e.g. latest or a version"
+    required: false
+    default: ""
   directory:
     description: "Directory to change into before building"
     required: false
@@ -52,7 +56,11 @@ runs:
         echo "[INFO]  • Full image name: ${{ inputs.registry_address }}/${{ inputs.app }}:${{ inputs.tag }}"
         echo "[INFO]  • Application:     ${{ inputs.app }}"
         echo "[INFO]  • Registry:        ${{ inputs.registry_address }}"
-        echo "[INFO]  • Tag:             ${{ inputs.tag }}"
+        echo "[INFO]  • Primary tag:     ${{ inputs.tag }}"
+        if [ -n "${{ inputs.extra_tag }}" ]; then
+          echo "[INFO]  • Additional tag:  ${{ inputs.extra_tag }}"
+          echo "[INFO]  • Extra image:      ${{ inputs.registry_address }}/${{ inputs.app }}:${{ inputs.extra_tag }}"
+        fi
         echo ""
         echo "[INFO] Build Context"
         echo "[INFO]  • Dockerfile:      ${{ inputs.dockerfile }}"
@@ -79,6 +87,14 @@ runs:
           ${{ inputs.context }} \
           ${{ inputs.args }}
 
+    - name: Tag image with additional tag
+      if: inputs.extra_tag != ''
+      shell: bash
+      run: |
+        docker tag \
+          "${{ inputs.registry_address }}/${{ inputs.app }}:${{ inputs.tag }}" \
+          "${{ inputs.registry_address }}/${{ inputs.app }}:${{ inputs.extra_tag }}"
+
     - name: Restore original .dockerignore
       if: inputs.dockerignore_override != ''
       shell: bash
@@ -96,3 +112,8 @@ runs:
     - name: Push image to registry
       shell: bash
       run: docker push "${{ inputs.registry_address }}/${{ inputs.app }}:${{ inputs.tag }}"
+
+    - name: Push additional tag to registry
+      if: inputs.extra_tag != ''
+      shell: bash
+      run: docker push "${{ inputs.registry_address }}/${{ inputs.app }}:${{ inputs.extra_tag }}"
