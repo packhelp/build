@@ -130,7 +130,7 @@ runs:
 
         image_tag="${{ inputs.registry_address }}/${{ inputs.app }}:${{ inputs.tag }}"
         digest="$(
-          docker buildx imagetools inspect "$image_tag" --format '{{json .Manifest}}' \
+          docker buildx imagetools inspect "$image_tag" --format '{{json .}}' \
             | jq -r '.digest // empty'
         )"
 
