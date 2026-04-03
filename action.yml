@@ -92,8 +92,8 @@ runs:
           ${{ inputs.context }} \
           ${{ inputs.args }}
         digest=$(cat metadata.json | jq -r '.["containerimage.digest"]')
-        echo "digest=$digest" >> "$GITHUB_OUTPUT"
-        echo "Image digest: $digest"
+        echo "image_digest=$digest" >> "$GITHUB_OUTPUT"
+        echo "Extracted Image digest: $digest"
 
     - name: Tag image with additional tag
       if: inputs.extra_tag != ''
