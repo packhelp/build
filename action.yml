@@ -1,5 +1,9 @@
 name: "Docker Build & Push"
 description: "Builds a Docker image and pushes it to a container registry"
+outputs:
+  image_digest:
+    description: "Digest of the pushed primary image tag"
+    value: ${{ steps.resolve_digest.outputs.digest }}
 inputs:
   app:
     description: "Application to build"
@@ -117,3 +121,23 @@ runs:
       if: inputs.extra_tag != ''
       shell: bash
       run: docker push "${{ inputs.registry_address }}/${{ inputs.app }}:${{ inputs.extra_tag }}"
+
+    - name: Resolve pushed image digest
+      id: resolve_digest
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        image_tag="${{ inputs.registry_address }}/${{ inputs.app }}:${{ inputs.tag }}"
+        digest="$(
+          docker buildx imagetools inspect "$image_tag" --format '{{json .Manifest}}' \
+            | jq -r '.digest // empty'
+        )"
+
+        if [[ -z "$digest" ]]; then
+          echo "Could not resolve image digest for $image_tag"
+          exit 1
+        fi
+
+        echo "digest=$digest" >> "$GITHUB_OUTPUT"
+        echo "Resolved digest: $digest"
