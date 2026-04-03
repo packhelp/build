@@ -88,8 +88,12 @@ runs:
         docker buildx build \
           --tag ${{ inputs.registry_address }}/${{ inputs.app }}:${{ inputs.tag }} \
           --file ${{ inputs.dockerfile }} \
+          --metadata-file=metadata.json \
           ${{ inputs.context }} \
           ${{ inputs.args }}
+        digest=$(cat metadata.json | jq -r '.["containerimage.digest"]')
+        echo "digest=$digest" >> "$GITHUB_OUTPUT"
+        echo "Image digest: $digest"
 
     - name: Tag image with additional tag
       if: inputs.extra_tag != ''
@@ -121,23 +125,3 @@ runs:
       if: inputs.extra_tag != ''
       shell: bash
       run: docker push "${{ inputs.registry_address }}/${{ inputs.app }}:${{ inputs.extra_tag }}"
-
-    - name: Resolve pushed image digest
-      id: resolve_digest
-      shell: bash
-      run: |
-        set -euo pipefail
-
-        image_tag="${{ inputs.registry_address }}/${{ inputs.app }}:${{ inputs.tag }}"
-        digest="$(
-          docker buildx imagetools inspect "$image_tag" --format '{{json .}}' \
-            | jq -r '.digest // empty'
-        )"
-
-        if [[ -z "$digest" ]]; then
-          echo "Could not resolve image digest for $image_tag"
-          exit 1
-        fi
-
-        echo "digest=$digest" >> "$GITHUB_OUTPUT"
-        echo "Resolved digest: $digest"
