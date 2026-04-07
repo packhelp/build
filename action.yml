@@ -1,5 +1,9 @@
 name: "Docker Build & Push"
 description: "Builds a Docker image and pushes it to a container registry"
+outputs:
+  image_digest:
+    description: "Digest of the pushed primary image tag"
+    value: ${{ steps.push_primary.outputs.image_digest }}
 inputs:
   app:
     description: "Application to build"
@@ -78,6 +82,7 @@ runs:
         cp "${{ inputs.dockerignore_override }}" "${{ inputs.context }}/.dockerignore"
 
     - name: Build Docker image
+      id: build_image
       shell: bash
       working-directory: ${{ inputs.directory }}
       run: |
@@ -110,8 +115,25 @@ runs:
         logout: false
 
     - name: Push image to registry
+      id: push_primary
       shell: bash
-      run: docker push "${{ inputs.registry_address }}/${{ inputs.app }}:${{ inputs.tag }}"
+      run: |
+        set -o pipefail
+
+        push_log="$(mktemp)"
+        docker push "${{ inputs.registry_address }}/${{ inputs.app }}:${{ inputs.tag }}" | tee "$push_log"
+
+        digest="$(
+          sed -nE 's|^.* digest: (sha256:[a-f0-9]+) size: .*$|\1|p' "$push_log" | tail -n 1
+        )"
+
+        if [[ -z "$digest" ]]; then
+          echo "Could not resolve pushed image digest for ${{ inputs.registry_address }}/${{ inputs.app }}:${{ inputs.tag }}." >&2
+          exit 1
+        fi
+
+        echo "image_digest=$digest" >> "$GITHUB_OUTPUT"
+        echo "Pushed image digest: $digest"
 
     - name: Push additional tag to registry
       if: inputs.extra_tag != ''
