@@ -44,7 +44,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - name: Display build information
       shell: bash
@@ -102,7 +102,7 @@ runs:
       run: mv "${{ inputs.context }}/.dockerignore.bak" "${{ inputs.context }}/.dockerignore"
 
     - name: Login to registry
-      uses: docker/login-action@v3
+      uses: docker/login-action@v4
       with:
         registry: ${{ inputs.registry_address }}
         username: ${{ inputs.registry_username }}
